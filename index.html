@@ -2,237 +2,554 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Ultimate Token Auction</title>
     <style>
+        :root {
+            --bg1: #081226;
+            --bg2: #0f2740;
+            --card: rgba(255, 255, 255, 0.06);
+            --accent: #ff7043;
+            --accent2: #ffd54f;
+            --good: #4caf50;
+            --text: #eaf2ff;
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        html,
         body {
-            font-family: Arial, sans-serif;
+            height: 100%;
+            margin: 0;
+            font-family: Inter, system-ui, Arial;
+            color: var(--text);
+        }
+
+        body {
+            background:
+                radial-gradient(1000px 600px at 10% 10%, rgba(255, 255, 255, 0.02), transparent 6%),
+                radial-gradient(800px 400px at 90% 90%, rgba(255, 255, 255, 0.01), transparent 6%),
+                linear-gradient(160deg, var(--bg1), var(--bg2));
             padding: 20px;
-            background: #eef2f7;
+            -webkit-font-smoothing: antialiased;
         }
 
-        input,
-        button {
-            padding: 5px;
-            margin: 5px;
+        .wrap {
+            max-width: 1100px;
+            margin: 0 auto
         }
 
-        h2,
-        h4 {
-            margin-top: 20px;
+        h2 {
+            margin: 0 0 14px;
+            font-size: 26px;
+            text-align: center;
+            color: var(--accent2);
+            letter-spacing: 0.6px
         }
 
-        .box {
-            background: #fff;
-            padding: 15px;
-            margin: 15px 0;
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14px
+        }
+
+        input[type="number"] {
+            width: 80px;
+            padding: 8px;
             border-radius: 8px;
-            border: 1px solid #ccc;
+            border: 1px solid var(--glass-border);
+            background: transparent;
+            color: var(--text)
+        }
+
+        button {
+            padding: 9px 14px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(90deg, var(--accent), #e64a19);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+            transition: transform .12s ease
+        }
+
+        button:active {
+            transform: translateY(1px)
+        }
+
+        button:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+            transform: none
+        }
+
+        .panel {
+            background: var(--card);
+            border-radius: 14px;
+            padding: 16px;
+            margin: 12px 0;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 30px rgba(2, 6, 23, 0.5)
+        }
+
+        .token-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center
+        }
+
+        .token-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, #ffd966, #ffb84d);
+            color: #2b1400;
+            font-weight: 700;
+            box-shadow: 0 6px 18px rgba(255, 168, 38, 0.15)
+        }
+
+        .token-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 30% 30%, #fff2c6, #ffb74d);
+            color: #5b2b00;
+            font-weight: 800;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2)
+        }
+
+        .token-list {
+            margin-left: 8px;
+            font-weight: 600
         }
 
         table {
-            border-collapse: collapse;
             width: 100%;
-            margin-top: 10px;
+            border-collapse: collapse;
+            margin-top: 10px
         }
 
         th,
         td {
-            border: 1px solid #333;
-            padding: 8px;
+            padding: 10px;
             text-align: center;
-        }
-
-        .bid-bar {
-            height: 30px;
-            background: #4CAF50;
-            color: #fff;
-            text-align: right;
-            padding-right: 5px;
-            border-radius: 4px;
-            transition: width 0.5s;
-            margin-bottom: 5px;
-        }
-
-        .highlight {
-            background: #FF5722 !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04)
         }
 
         .bid-input {
-            width: 60px;
+            width: 84px;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            background: transparent;
+            color: var(--text);
+            text-align: center
         }
 
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
+        #bidBars>div {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .bar-wrap {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 6px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.02)
+        }
+
+        .bid-bar {
+            height: 36px;
+            border-radius: 6px;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            font-weight: 700;
+            transition: width .6s cubic-bezier(.2, .9, .2, 1), background .4s;
+            box-shadow: inset 0 -8px 20px rgba(0, 0, 0, 0.25);
+            color: #081226;
+        }
+
+        .highlight {
+            animation: pulse 900ms infinite alternate;
+            background: linear-gradient(90deg, var(--accent2), var(--accent));
+            color: #1b0a00
+        }
+
+        @keyframes pulse {
+            from {
+                transform: scale(1)
+            }
+
+            to {
+                transform: scale(1.02)
+            }
+        }
+
+        .money {
+            color: #a7ffeb;
+            font-weight: 700
+        }
+
+        .summary-list {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px
+        }
+
+        /* small responsive */
+        @media (max-width:700px) {
+            .controls {
+                flex-direction: column
+            }
+
+            .token-list {
+                width: 100%
+            }
         }
     </style>
 </head>
 
 <body>
+    <div class="wrap">
+        <h2>Ultimate Token Auction</h2>
 
-    <h2>Ultimate Token Auction System</h2>
+        <div class="controls">
+            <label>No. of Players: <input id="players" type="number" min="2" value="4"></label>
+            <label>No. of Plots: <input id="plots" type="number" min="1" value="3"></label>
+            <button id="startBtn">Start Auction</button>
+        </div>
 
-    <label>No. of Players:</label><input type="number" id="players" min="2" value="4">
-    <label>No. of Plots:</label><input type="number" id="plots" min="1" value="3">
-    <button onclick="initGame()">Start Auction</button>
-
-    <div id="gameArea"></div>
+        <div id="gameArea"></div>
+    </div>
 
     <script>
+        /* State */
         let totalTokens = {}, currentBids = {}, accountBalance = {};
         let noOfPlayers = 0, noOfPlots = 0, currentPlot = 1;
-        let plotWinners = {}; // store plot winner info
+        let plotWinners = {};
 
-        function initGame() {
-            noOfPlayers = Number(document.getElementById('players').value);
-            noOfPlots = Number(document.getElementById('plots').value);
-
-            totalTokens = {}; accountBalance = {}; currentBids = {}; currentPlot = 1;
-            plotWinners = {};
-
-            for (let i = 1; i <= noOfPlayers; i++) { totalTokens[i] = 100; accountBalance[i] = 0; }
-
-            showGame();
+        /* UTIL: format number (Indian grouping) */
+        function fmt(n) {
+            // keep negative sign correct and show integers
+            if (typeof n !== 'number') n = Number(n) || 0;
+            return n.toLocaleString('en-IN');
         }
 
-        function showGame() {
-            let html = "<div class='box'><strong>Tokens Remaining:</strong> <span id='tokenDisplay'></span></div>";
-            html += "<div id='plotsArea'></div>";
-            html += "<div class='box'><strong>Account Balances:</strong> <span id='balanceDisplay'></span></div>";
-            html += "<div id='summary'></div>";
-            document.getElementById('gameArea').innerHTML = html;
-            updateTokenDisplay(); updateBalanceDisplay();
+        /* Smooth animated number with easing, capped to maxDuration (ms).
+           Uses requestAnimationFrame to produce smooth visually continuous increments.
+           duration scales with magnitude but capped to 3000ms (3s).
+           prefix/suffix shown around formatted integer.
+        */
+        function animateNumber(id, start, end, opts = {}) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const { maxDuration = 3000, minDuration = 500, prefix = '', suffix = '' } = opts;
+            const diff = end - start;
+            if (diff === 0) { el.innerText = prefix + fmt(end) + suffix; return; }
+
+            // duration scales with log of magnitude to avoid huge jumps but still finish quickly
+            const magnitude = Math.abs(diff);
+            const calc = Math.max(minDuration, Math.min(maxDuration, 700 + Math.log10(magnitude + 1) * 600));
+            const duration = Math.round(calc);
+
+            const startTime = performance.now();
+            const easeOut = t => 1 - Math.pow(1 - t, 3); // smooth ease-out
+
+            function frame(now) {
+                const elapsed = now - startTime;
+                const t = Math.min(1, elapsed / duration);
+                const eased = easeOut(t);
+                const cur = start + diff * eased;
+                const rounded = Math.round(cur);
+                el.innerText = prefix + fmt(rounded) + suffix;
+                if (t < 1) requestAnimationFrame(frame);
+                else el.innerText = prefix + fmt(end) + suffix;
+            }
+            requestAnimationFrame(frame);
+        }
+
+        /* Initialize game */
+        document.getElementById('startBtn').addEventListener('click', initGame);
+        function initGame() {
+            noOfPlayers = Number(document.getElementById('players').value) || 4;
+            noOfPlots = Number(document.getElementById('plots').value) || 3;
+
+            totalTokens = {}; accountBalance = {}; currentBids = {}; plotWinners = {}; currentPlot = 1;
+            for (let i = 1; i <= noOfPlayers; i++) { totalTokens[i] = 100; accountBalance[i] = 0; currentBids[i] = { token: 0, rupee: 0 }; }
+            renderShell();
+            updateTokenDisplay(true);
+            updateBalanceDisplay(true);
             createPlotBid(currentPlot);
         }
 
-        function updateTokenDisplay() {
-            let display = "";
-            for (let i = 1; i <= noOfPlayers; i++) { display += `Player ${i}: ${totalTokens[i]} &nbsp; `; }
-            document.getElementById('tokenDisplay').innerHTML = display;
+        /* Render main layout placeholders */
+        function renderShell() {
+            const html = `
+    <div class="panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div class="token-row">
+          <div class="token-badge"><div class="token-icon">T</div><div style="min-width:120px">Tokens Remaining</div></div>
+          <div class="token-list" id="tokenDisplay"></div>
+        </div>
+        <div><button id="resetBtn">Reset</button></div>
+      </div>
+    </div>
+
+    <div id="plotsArea"></div>
+
+    <div class="panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div><strong>Account Balances</strong></div>
+      </div>
+      <div id="balanceDisplay" style="margin-top:10px"></div>
+    </div>
+
+    <div id="summary"></div>
+  `;
+            document.getElementById('gameArea').innerHTML = html;
+            document.getElementById('resetBtn').addEventListener('click', initGame);
         }
 
-        function updateBalanceDisplay() {
-            let display = "<table><tr><th>Player</th><th>Balance</th></tr>";
-            for (let i = 1; i <= noOfPlayers; i++) { display += <tr><td>Player ${i}</td><td>₹${accountBalance[i]}</td></tr>; }
-            display += "</table>";
+        /* Display tokens (creates spans with ids tokenP#) */
+        function updateTokenDisplay(skipAnimation) {
+            let container = document.getElementById('tokenDisplay');
+            let html = '';
+            for (let i = 1; i <= noOfPlayers; i++) {
+                html += `<span style="display:inline-block;margin-right:12px">Player ${i}: <span id="tokenP${i}">${fmt(totalTokens[i])}</span></span>`;
+            }
+            container.innerHTML = html;
+            // if not skipAnimation, animate each to current value (handles external changes)
+            if (!skipAnimation) {
+                for (let i = 1; i <= noOfPlayers; i++) {
+                    const el = document.getElementById(`tokenP${i}`);
+                    if (el) {
+                        // attempt to parse current displayed value
+                        const current = Number((el.innerText || '').replace(/,/g, '')) || totalTokens[i];
+                        animateNumber(`tokenP${i}`, current, totalTokens[i], { maxDuration: 2500 });
+                    }
+                }
+            }
+        }
+
+        /* Display balances table (rows with balanceP#) */
+        function updateBalanceDisplay(skipAnimation) {
+            let display = `<table><tr><th>Player</th><th>Balance</th></tr>`;
+            for (let i = 1; i <= noOfPlayers; i++) {
+                display += `<tr><td>Player ${i}</td><td><span id="balanceP${i}" class="money">₹${fmt(accountBalance[i])}</span></td></tr>`;
+            }
+            display += `</table>`;
             document.getElementById('balanceDisplay').innerHTML = display;
-        }
-
-        function createPlotBid(plotNo) {
-            if (plotNo > noOfPlots) { showSummary(); return; }
-            currentBids = {};
-
-            let html = <h4>Bidding for Plot ${plotNo}</h4>;
-            html += <table><tr><th>Player</th><th>Token Bid</th><th>Rupee Tie-Breaker</th></tr>;
-            for (let i = 1; i <= noOfPlayers; i++) {
-                html += `<tr>
-            <td>Player ${i}</td>
-            <td><input class="bid-input" type="number" id="token${i}" max="${totalTokens[i]}" value="0" onchange="updateBid(${i})"></td>
-            <td><input class="bid-input" type="number" id="rupees${i}" value="0" disabled onchange="updateBid(${i})"></td>
-        </tr>`;
+            if (!skipAnimation) {
+                for (let i = 1; i <= noOfPlayers; i++) {
+                    const el = document.getElementById(`balanceP${i}`);
+                    if (el) {
+                        const current = Number((el.innerText || '').replace(/[^0-9-]/g, '')) || accountBalance[i];
+                        animateNumber(`balanceP${i}`, current, accountBalance[i], { maxDuration: 2500, prefix: '₹' });
+                    }
+                }
             }
-            html += "</table>";
-            html += "<h4>Live Visual Bids:</h4><div id='bidBars'></div>";
-            html += "<button id='finalizeBtn' onclick='finalizePlot()'>Finalize Plot</button>";
-            document.getElementById('plotsArea').innerHTML = html;
-
-            updateVisualBids();
-            checkFinalizeEnabled();
         }
 
+        /* Create bidding UI for a plot */
+function createPlotBid(plotNo) {
+    if (plotNo > noOfPlots) { showSummary(); return; }
+
+    // reset bids fresh for this plot
+    currentBids = {};
+    for (let i = 1; i <= noOfPlayers; i++) {
+        currentBids[i] = { token: 0, rupee: 0 };
+    }
+
+    let html = `<div class="panel"><h3 style="margin:0 0 8px">Bidding for Plot ${plotNo}</h3>`;
+    html += `<table><tr><th>Player</th><th>Token Bid</th><th>Rupee Tie-Breaker</th></tr>`;
+    for (let i = 1; i <= noOfPlayers; i++) {
+        html += `<tr>
+      <td>Player ${i}</td>
+      <td><input id="token${i}" class="bid-input" type="number" min="0" value="0" max="${totalTokens[i]}" onchange="updateBid(${i})"></td>
+      <td><input id="rupees${i}" class="bid-input" type="number" min="0" value="0" disabled onchange="updateBid(${i})"></td>
+    </tr>`;
+    }
+    html += `</table>
+    <h4 style="margin-top:12px">Live Visual Bids</h4><div id="bidBars"></div>
+    <div style="margin-top:10px"><button id="finalizeBtn">Finalize Plot</button></div>
+  </div>`;
+    document.getElementById('plotsArea').innerHTML = html;
+    document.getElementById('finalizeBtn').addEventListener('click', finalizePlot);
+
+    updateVisualBids();
+    checkFinalizeEnabled();
+}
+
+
+        /* Called when a token/rupee input changes */
         function updateBid(player) {
-            let tokenBid = Number(document.getElementById(token${player}).value);
-            if (tokenBid > totalTokens[player]) {
-                alert("Cannot bid more than remaining tokens");
-                document.getElementById(token${player}).value = totalTokens[player]; tokenBid = totalTokens[player];
-            }
-            currentBids[player] = { token: tokenBid, rupee: Number(document.getElementById(rupees${player}).value || 0) };
+            const tEl = document.getElementById(`token${player}`);
+            const rEl = document.getElementById(`rupees${player}`);
+            if (!tEl || !rEl) return;
+            let tokenBid = Number(tEl.value) || 0;
+            if (tokenBid > totalTokens[player]) { tokenBid = totalTokens[player]; tEl.value = tokenBid; }
+            currentBids[player] = { token: tokenBid, rupee: Number(rEl.value) || 0 };
 
-            let maxToken = Math.max(...Object.values(currentBids).map(b => b.token || 0));
-            let countMax = Object.values(currentBids).filter(b => b.token === maxToken).length;
+            const allTokens = [];
+            for (let k = 1; k <= noOfPlayers; k++) allTokens.push(currentBids[k]?.token || 0);
+            const maxToken = allTokens.length ? Math.max(...allTokens) : 0;
+            const countMax = allTokens.filter(x => x === maxToken).length;
+
             for (let i = 1; i <= noOfPlayers; i++) {
-                document.getElementById(rupees${i}).disabled = !(currentBids[i]?.token === maxToken && countMax > 1);
+                const ruEl = document.getElementById(`rupees${i}`);
+                if (!ruEl) continue;
+                ruEl.disabled = !(currentBids[i]?.token === maxToken && countMax > 1);
             }
+
             updateVisualBids();
             checkFinalizeEnabled();
         }
 
+        /* Visual bid bars */
         function updateVisualBids() {
-            let container = document.getElementById('bidBars'); container.innerHTML = "";
-            let maxToken = Math.max(...Object.values(currentBids).map(b => b.token || 0));
-            let scale = maxToken > 0 ? maxToken : 100;
+            const container = document.getElementById('bidBars');
+            if (!container) return;
+            container.innerHTML = '';
+            const bids = [];
+            for (let i = 1; i <= noOfPlayers; i++) bids.push({ player: i, token: currentBids[i]?.token || 0, rupee: currentBids[i]?.rupee || 0 });
+            const maxToken = bids.length ? Math.max(...bids.map(b => b.token)) : 0;
+            const scale = maxToken > 0 ? maxToken : 100;
 
-            for (let i = 1; i <= noOfPlayers; i++) {
-                let token = currentBids[i]?.token || 0;
-                let rupee = currentBids[i]?.rupee || 0;
-                let widthPercent = (token / scale) * 100;
-                let highlight = token === maxToken && maxToken > 0 ? "highlight" : "";
-                container.innerHTML += <div>Player ${i}: <div class='bid-bar ${highlight}' style='width:${widthPercent}%;'>${token} tokens ${highlight && rupee > 0 ? "₹" + rupee : ""}</div></div>;
+            for (const b of bids) {
+                const pct = scale === 0 ? 0 : Math.round((b.token / scale) * 100);
+                const highlight = (b.token === maxToken && maxToken > 0) ? 'highlight' : '';
+                const barHtml = `<div style="min-width:110px">Player ${b.player}</div>
+      <div class="bar-wrap"><div id="barP${b.player}" class="bid-bar ${highlight}" style="width:${pct}%;background:${highlight ? '' : 'linear-gradient(90deg,#80e27e,#4caf50)'}">
+        ${b.token ? fmt(b.token) + ' tokens' : '0'} ${highlight && b.rupee ? ' • ₹' + fmt(b.rupee) : ''}
+      </div></div>`;
+                const row = document.createElement('div'); row.innerHTML = barHtml;
+                container.appendChild(row);
             }
         }
 
+        /* Enable/disable finalize button */
         function checkFinalizeEnabled() {
-            let finalizeBtn = document.getElementById('finalizeBtn');
-            if (!finalizeBtn) return;
-
-            let bidsArray = Object.keys(currentBids).map(p => ({ player: Number(p), ...currentBids[p] }));
-            let maxToken = Math.max(...bidsArray.map(b => b.token));
-            let topBidders = bidsArray.filter(b => b.token === maxToken);
-
-            if (topBidders.length > 1) {
-                let allEntered = topBidders.every(b => b.rupee !== undefined && b.rupee !== null);
-                if (!allEntered) { finalizeBtn.disabled = true; return; }
-
-                let rupeeValues = topBidders.map(b => b.rupee);
-                let uniqueRupees = new Set(rupeeValues);
-                finalizeBtn.disabled = uniqueRupees.size !== topBidders.length;
-            } else finalizeBtn.disabled = false;
+            const btn = document.getElementById('finalizeBtn');
+            if (!btn) return;
+            const bidsArray = [];
+            for (let p = 1; p <= noOfPlayers; p++) bidsArray.push({ player: p, token: currentBids[p]?.token || 0, rupee: currentBids[p]?.rupee || 0 });
+            const maxToken = Math.max(...bidsArray.map(b => b.token));
+            const top = bidsArray.filter(b => b.token === maxToken);
+            if (top.length > 1) {
+                const allEntered = top.every(b => b.rupee !== undefined && b.rupee !== null);
+                if (!allEntered) { btn.disabled = true; return; }
+                const rupeeVals = top.map(b => b.rupee);
+                const unique = new Set(rupeeVals);
+                btn.disabled = unique.size !== top.length;
+            } else btn.disabled = false;
         }
 
+        /* Finalize plot: determine winner, deduct tokens, handle rupee distribution.
+           Preserves core idea: if tie and rupee winner pays rupee amount; rupee is subtracted from winner and equally distributed to other players.
+        */
         function finalizePlot() {
+            // capture rupee entries for those enabled (tie-breakers)
             for (let i = 1; i <= noOfPlayers; i++) {
-                if (!document.getElementById(rupees${i}).disabled) currentBids[i].rupee = Number(document.getElementById(rupees${i}).value);
+                const ruEl = document.getElementById(`rupees${i}`);
+                if (ruEl && !ruEl.disabled) currentBids[i].rupee = Number(ruEl.value) || 0;
             }
 
-            let bidsArray = Object.keys(currentBids).map(p => ({ player: Number(p), ...currentBids[p] }));
-            let maxToken = Math.max(...bidsArray.map(b => b.token));
-            let candidates = bidsArray.filter(b => b.token === maxToken);
+            const bidsArray = [];
+            for (let p = 1; p <= noOfPlayers; p++) bidsArray.push({ player: p, token: currentBids[p]?.token || 0, rupee: currentBids[p]?.rupee || 0 });
+            const maxToken = Math.max(...bidsArray.map(b => b.token));
+            const candidates = bidsArray.filter(b => b.token === maxToken);
 
             let winner;
             if (candidates.length === 1) winner = candidates[0];
-            else winner = candidates.reduce((prev, curr) => curr.rupee > prev.rupee ? curr : prev);
+            else {
+                // tie-breaker: higher rupee wins
+                winner = candidates.reduce((prev, curr) => (curr.rupee > prev.rupee ? curr : prev));
+            }
 
-            // Deduct winner's tokens and rupees
-            totalTokens[winner.player] -= winner.token;
+            if (!winner || winner.token <= 0) {
+                alert('No valid bid placed. Move to next or adjust bids.');
+                return;
+            }
+
+            // 1) Deduct winner tokens (animate)
+            const p = winner.player;
+            const oldTokens = totalTokens[p];
+            totalTokens[p] -= winner.token;
+            if (totalTokens[p] < 0) totalTokens[p] = 0;
+            // ensure token display exists
+            if (!document.getElementById(`tokenP${p}`)) updateTokenDisplay(true);
+            animateNumber(`tokenP${p}`, oldTokens, totalTokens[p], { maxDuration: 2500 });
+
+            // 2) Rupee handling: if tie and rupees used and winner paid rupee > 0
             if (candidates.length > 1 && winner.rupee > 0) {
-                accountBalance[winner.player] -= winner.rupee; // negative balance for winner
-                let share = winner.rupee / (noOfPlayers - 1);
+                const oldBalWinner = accountBalance[p];
+                accountBalance[p] -= winner.rupee; // winner pays (negative)
+                animateNumber(`balanceP${p}`, oldBalWinner, accountBalance[p], { maxDuration: 2500, prefix: '₹' });
+
+                const share = winner.rupee / (noOfPlayers - 1);
                 for (let i = 1; i <= noOfPlayers; i++) {
-                    if (i !== winner.player) accountBalance[i] += share; // accumulate for others
+                    if (i === p) continue;
+                    const oldBal = accountBalance[i];
+                    accountBalance[i] += share;
+                    // animate each other's balance
+                    const el = document.getElementById(`balanceP${i}`);
+                    if (!el) updateBalanceDisplay(true);
+                    animateNumber(`balanceP${i}`, oldBal, accountBalance[i], { maxDuration: 2500, prefix: '₹' });
                 }
             }
 
-            plotWinners[currentPlot] = winner.player;
+            plotWinners[currentPlot] = p;
 
-            alert(Winner for Plot ${currentPlot} is Player ${winner.player} with ${winner.token} tokens${candidates.length > 1 ? " and ₹" + winner.rupee + " tie-breaker" : ""});
-            updateTokenDisplay(); updateBalanceDisplay();
-            currentPlot++;
-            if (currentPlot <= noOfPlots) createPlotBid(currentPlot);
-            else showSummary();
+            // After animations started, inform user and advance
+            setTimeout(() => {
+                alert(`Winner for Plot ${currentPlot}: Player ${p} with ${winner.token} tokens${candidates.length > 1 ? ' and ₹' + fmt(winner.rupee) + ' tie-breaker' : ''}`);
+                currentPlot++;
+                if (currentPlot <= noOfPlots) {
+                    // recreate plot UI and ensure token inputs' max are correct
+                    createPlotBid(currentPlot);
+                    // update token displays for all players (animated to current values)
+                    updateTokenDisplay();
+                    updateBalanceDisplay();
+                } else {
+                    // end
+                    updateTokenDisplay();
+                    updateBalanceDisplay();
+                    showSummary();
+                }
+            }, 200); // small delay to let animateNumber start
         }
 
+        /* Summary at end */
         function showSummary() {
-            let html = "<h4>All Plots Allocation</h4><table><tr><th>Plot</th><th>Winner</th></tr>";
+            const htmlParts = [];
+            htmlParts.push(`<div class="panel"><h3>All Plots Allocation</h3>`);
+            htmlParts.push(`<table><tr><th>Plot</th><th>Winner</th></tr>`);
             for (let i = 1; i <= noOfPlots; i++) {
-                html += <tr><td>${i}</td><td>Player ${plotWinners[i]}</td></tr>;
+                const w = plotWinners[i] || '-';
+                htmlParts.push(`<tr><td>${i}</td><td>${w === '-' ? '-' : 'Player ' + w}</td></tr>`);
             }
-            html += "</table>";
-            document.getElementById('plotsArea').innerHTML = html;
+            htmlParts.push(`</table></div>`);
+            document.getElementById('plotsArea').innerHTML = htmlParts.join('');
         }
-    </script>
 
+        /* ensure UI starts in default state */
+        initGame();
+    </script>
 </body>
 
 </html>
